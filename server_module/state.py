@@ -5,7 +5,7 @@ from random import randrange
 from statistics import median_low
 from typing import Any
 
-from .log import Log, Entry
+from .log import Logger, Entry
 
 
 class StateName(Enum):
@@ -31,7 +31,7 @@ class State:
     # Candidate address that received vote in current term
     _voted_for: str | None
     # Log entries
-    _log: Log[Entry]
+    _log: Logger[Entry]
 
     def __init__(self, state: dict[str, Any]):
         self._address = state['address']
@@ -41,7 +41,7 @@ class State:
         self._protocol = state.get('protocol')
         self._current_term = state.get('current_term') or 0
         self._voted_for = state.get('voted_for') or None
-        self._log = state.get('log') or Log()
+        self._log = state.get('log') or Logger()
 
     def __get_state(self):
         state = {
@@ -144,9 +144,8 @@ class Follower(State):
     def __request_vote_received(self, message: dict[str, Any], candidate: str):
         term_is_current = message['term'] >= self._current_term
         can_vote = not self._voted_for or self._voted_for == candidate
-        log_is_up_to_date = \
-            message['last_log_term'] > self._log.last_term or \
-            (message['last_log_term'] == self._log.last_term and message['last_log_index'] >= self._log.last_index)
+        log_is_up_to_date = message['last_log_term'] > self._log.last_term or \
+                            (message['last_log_term'] == self._log.last_term and message['last_log_index'] >= self._log.last_index)
         vote_granted = term_is_current and can_vote and log_is_up_to_date
         
         if vote_granted:

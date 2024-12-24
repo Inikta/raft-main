@@ -34,7 +34,7 @@ class Client:
         
         return pickle.loads(buffer)
 
-    def __make_attempt(self, data: bytes):
+    def __try_request(self, data: bytes):      
         self.__socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         server_address = self.__get_server_address()
         self.__socket.connect(server_address)
@@ -43,7 +43,7 @@ class Client:
         
         if response['type'] == 'redirect':
             self.__server_address = separate_address(response['leader'])
-            response = self.__make_attempt(data)
+            response = self.__try_request(data)
         
         return response
 
@@ -52,7 +52,7 @@ class Client:
         response = None
         
         for attempt in range(retry_attempts):
-            response = self.__make_attempt(data)
+            response = self.__try_request(data)
             if response['success']:
                 break
         

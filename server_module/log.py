@@ -38,7 +38,7 @@ class StateMachine(UserDict):
                 del self.data[key]
 
 
-class Log(UserList):
+class Logger(UserList):
     last_index: int
     last_term: int
     commit_index: int
